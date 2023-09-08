@@ -1,45 +1,29 @@
 import { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthContext from '../components/store/AuthContext'
+import { useForm } from 'react-hook-form'
+import { getAuth, fetchSignInMethodsForEmail } from 'firebase/auth'
 
 const SignUp = () => {
 	const ctx = useContext(AuthContext)
 	const validateEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-
-	const [enteredEmail, setEnteredEmail] = useState('')
-	const [enteredPassword, setEnteredPassword] = useState('')
-
-	const [error, setError] = useState(false)
-	const [emailError, setEmailError] = useState(false)
-	const [passwordError, setPasswordError] = useState(false)
 	const navigate = useNavigate()
-	const emailHandler = event => {
-		setEnteredEmail(event.target.value)
-	}
-	const passwordHandler = event => {
-		setEnteredPassword(event.target.value)
-	}
-	const handleSubmit = async event => {
-		event.preventDefault()
+	const [error, setError] = useState(false)
+	const [emailError, setEmailError] = useState('')
+	const {register,handleSubmit,formState: {errors},} = useForm()
+
+	const onSubmit = async data => {
+		const auth = getAuth()
 		try {
-			await ctx.signUp(enteredEmail, enteredPassword)
+			const methods = await fetchSignInMethodsForEmail(auth, data.email)
+			if (methods && methods.length > 0) {
+				setEmailError('Email address is already in use.')
+				return
+			}
+			await ctx.signUp(data.email, data.password)
 			navigate('/')
 		} catch (error) {
-			console.log(error);
-			setError('Enter valid data and try again.')
-		}
-		if (enteredEmail.trim().length === 0 || !validateEmail.test(enteredEmail)) {
-			setEmailError(true)
-			if (enteredPassword.trim().length <= 5) {
-				setPasswordError(true)
-			} else {
-				setPasswordError(false)
-			}
-		} else if (enteredPassword.trim().length <= 5) {
-			setPasswordError(true)
-		} else {
-			setPasswordError(false)
-			setEmailError(false)
+			setError(error.message)
 		}
 	}
 	return (
@@ -57,30 +41,40 @@ const SignUp = () => {
 					<div
 						className=" px-10 xsm:max-w-[450px] h-[600px] mx-auto bg-black/75
                     text-white">
-						<div className="xsm:max-w-[320px] mx-auto py-14">
+						<div className="xsm:max-w-[320px] mx-auto py-">
 							<h1 className="font-bold text-2xl mb-7 xsm:py-10 xsm:text-3xl ">Sign Up</h1>
-							<form onSubmit={handleSubmit} className="flex flex-col justify-center items-center ">
+							<form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col justify-center items-center ">
 								<input
-									onChange={emailHandler}
 									className="w-full px-3 py-3 rounded bg-gray-600/75"
 									type="email"
 									placeholder="Email address"
 									autoComplete="email"
-									value={enteredEmail}
+									{...register('email', {
+										required: 'Enter valid email',
+										pattern: {
+											value: validateEmail,
+											message: 'Enter valid email and try again.',
+										},
+									})}
 								/>
-								{emailError && <p className="text-red-400 font-bold my-2">Enter valid email</p>}
+								{errors.email && <p className="text-red-400 font-bold my-2">{errors.email.message}</p>}
+								{emailError && <p className="text-red-400 font-bold my-2">{emailError}</p>}
 								<input
-									onChange={passwordHandler}
 									className="w-full px-3 py-3 my-5 rounded bg-gray-600/75"
 									type="password"
 									placeholder="Password"
-									value={enteredPassword}
+									{...register('password', {
+										required: 'Password must be at least 6 characters long',
+										minLength: { value: 6, message: 'Password must be at least 6 characters long' },
+									})}
 								/>
+								{errors.password && (
+									<p className="text-red-400 text-center font-bold my-2">{errors.password.message}</p>
+								)}
 								{error && <p className="text-red-400 font-bold ">{error}</p>}
-								{passwordError && <p className='text-red-400 font-bold'>Password must be longer than 5 characters. </p>}
-								
-
-								<button className="bg-red-600 px-6 py-3 rounded transition duration-300 hover:bg-red-800 w-full my-10 font-bold">
+								<button
+									type="submit"
+									className="bg-red-600 px-6 py-3 rounded transition duration-300 hover:bg-red-800 w-full my-10 font-bold">
 									Sign Up
 								</button>
 								<p className="text-right w-full hover:underline">

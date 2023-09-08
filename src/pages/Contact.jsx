@@ -1,38 +1,21 @@
 import { useState } from 'react'
-import Modal from '../components/Modal'
+import Modal from '../components/UI/Modal'
+import { useForm } from 'react-hook-form'
 const Contact = () => {
 	const validateEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-	const [enteredMsg, setEnteredMsg] = useState('')
-	const [enteredEmail, setEnteredEmail] = useState('')
+	const {
+		register,
+		handleSubmit,
+		reset,
+		formState: { errors },
+	} = useForm()
+
 	const [msgIsSent, setMsgIsSent] = useState(false)
-	const [emailError, setEmailError] = useState(false)
-	const [msgError, setMsgError] = useState(false)
-	const textHandler = event => {
-		setEnteredMsg(event.target.value)
-		setMsgError(false)
-	}
-	const emailHandler = event => {
-		setEnteredEmail(event.target.value)
-		setEmailError(false)
-	}
-	const submitHandler = event => {
-		event.preventDefault()
-		if (enteredEmail.trim().length === 0 || !validateEmail.test(enteredEmail)) {
-			setEmailError(true)
-			if (enteredMsg.trim().length === 0) {
-				setMsgError(true)
-			} else {
-				setMsgError(false)
-			}
-		} else if (enteredMsg.trim().length === 0) {
-			setMsgError(true)
-		} else {
-			setMsgIsSent(true)
-			setEmailError(false)
-			setMsgError(false)
-			setEnteredEmail('')
-			setEnteredMsg('')
-		}
+	useState(false)
+
+	const onSubmit = () => {
+		reset()
+		setMsgIsSent(true)
 	}
 	return (
 		<>
@@ -41,22 +24,33 @@ const Contact = () => {
 					<h1 className="text-white text-center text-4xl font-bold my-5">Contact us</h1>
 					<div className=" px-10   text-white">
 						<div className="xsm:max-w-[500px] mx-auto py-14">
-							<form onSubmit={submitHandler} className="flex flex-col justify-center items-center ">
+							<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col justify-center items-center ">
 								<input
-									value={enteredEmail}
-									onChange={emailHandler}
 									className="w-full px-3 py-3 mb-5 rounded bg-gray-600/75"
 									type="email"
 									placeholder="Email address"
 									autoComplete="email"
+									{...register('email', {
+										required: 'Enter valid email',
+										pattern: {
+											value: validateEmail,
+											message: 'Enter valid email and try again.',
+										},
+									})}
 								/>
-								{emailError && <p className="text-red-400 font-bold mb-4">Enter valid email and try again</p>}
+								{errors.email && <p className="text-red-400 font-bold mb-5">{errors.email.message}</p>}
+
 								<textarea
-									value={enteredMsg}
-									onChange={textHandler}
 									placeholder="Message"
-									className="w-full min-h-[250px] max-h-[250px] p-3 bg-gray-600/75 "></textarea>
-								{msgError && <p className="text-red-400 font-bold my-5 ">Fill the message area.</p>}
+									className="w-full min-h-[250px] max-h-[250px] p-3 bg-gray-600/75 
+									
+									"
+									{...register('textarea', {
+										required: 'Fill the message area.',
+										minLength: { value: 10, message: 'Message must contain at least 10 characters.' },
+									})}></textarea>
+								{errors.textarea && <p className="text-red-400 font-bold m-3">{errors.textarea.message}</p>}
+
 								<button className="bg-red-600 px-6 py-3 rounded transition duration-300 hover:bg-red-800 w-full my-5 font-bold">
 									Send
 								</button>
@@ -68,10 +62,14 @@ const Contact = () => {
 						<Modal
 							title="Your message was sent successfully!"
 							isOpen={msgIsSent}
-							backgroundBtn="bg-green-400"
-							backgroundBtnHover="bg-green-500"
 							backgroundModal="bg-green-800"
-							onClose={() => setMsgIsSent(false)}></Modal>
+							onClose={() => setMsgIsSent(false)}>
+							<button
+								onClick={() => setMsgIsSent(false)}
+								className="mt-4 mx-auto p-2 w-[40%] bg-green-400 rounded hover:delay-150 hover:bg-green-500">
+								ok
+							</button>
+						</Modal>
 					)}
 				</div>
 			</div>

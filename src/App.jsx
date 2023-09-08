@@ -7,6 +7,7 @@ import Contact from './pages/Contact'
 import Account from './pages/Account'
 import SignUp from './pages/SignUp'
 import ProtectedRoute from './components/ProtectedRoute'
+
 function App() {
 	return (
 		<>

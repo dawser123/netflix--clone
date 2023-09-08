@@ -2,7 +2,7 @@ import { useState, useContext } from 'react'
 import { FaHeart, FaRegHeart } from 'react-icons/fa'
 import AuthContext from './store/AuthContext'
 import { arrayUnion, doc, updateDoc } from 'firebase/firestore'
-import Modal from './Modal'
+import Modal from './UI/Modal'
 import { db } from '../firebase'
 const Movie = ({ item }) => {
 	const ctx = useContext(AuthContext)
@@ -29,10 +29,15 @@ const Movie = ({ item }) => {
 			<Modal
 				title="Log in to save a movie!"
 				isOpen={error}
-				backgroundBtn="bg-red-400"
-				backgroundBtnHover="bg-red-500"
+				className="bg-green-700"
 				backgroundModal="bg-red-800"
-				onClose={() => seError(false)}></Modal>
+				onClose={() => seError(false)}>
+				<button
+					onClick={() => seError(false)}
+					className="mt-4 mx-auto p-2 w-[40%] bg-red-400 rounded hover:delay-150 hover:bg-red-500">
+					OK
+				</button>
+			</Modal>
 			<div className="w-[160px] xsm:w-[200px]  cursor-pointer inline-block relative p-1">
 				<img
 					className="w-full h-auto block"
