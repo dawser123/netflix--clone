@@ -12,7 +12,7 @@ Email: test@gmail.com Password: testest
 Now you can add and remove movies from favorites
 
 # Live
-[Live site URL here](https://netflix-clone-react-4b594.firebaseapp.com/)
+[Live site URL here](https://netflix-clone-b3a93.firebaseapp.com/)
 
 
 
